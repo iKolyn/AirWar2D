@@ -147,7 +147,9 @@
     "__prefab": {
       "__id__": 7
     },
+    "bulletType": 1,
     "speed": 600,
+    "player": null,
     "_id": ""
   },
   {
