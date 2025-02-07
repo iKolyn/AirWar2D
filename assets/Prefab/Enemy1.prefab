@@ -36,8 +36,8 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -19.796,
-      "y": 603.195,
+      "x": -20.449,
+      "y": 614.163,
       "z": 0
     },
     "_lrot": {
@@ -206,13 +206,12 @@
       {
         "__uuid__": "8e1d3e42-72d0-47b4-ace1-7fefca664147",
         "__expectedType__": "cc.AnimationClip"
-      },
-      {
-        "__uuid__": "6a8f3543-145a-4042-8bf2-7889087ab425",
-        "__expectedType__": "cc.AnimationClip"
       }
     ],
-    "_defaultClip": null,
+    "_defaultClip": {
+      "__uuid__": "8e1d3e42-72d0-47b4-ace1-7fefca664147",
+      "__expectedType__": "cc.AnimationClip"
+    },
     "_id": ""
   },
   {
@@ -246,8 +245,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
-      "height": 100
+      "width": 69,
+      "height": 82
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -276,6 +275,7 @@
     "downAnim": {
       "__id__": 7
     },
+    "enemyN": 1,
     "_id": ""
   },
   {
@@ -291,6 +291,6 @@
       "__id__": 0
     },
     "fileId": "f3DBA0uuhA95J8W7e7Ur8V",
-    "targetOverrides": null
+    "targetOverrides": []
   }
 ]
