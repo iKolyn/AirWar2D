@@ -1,4 +1,4 @@
-import { _decorator, CCInteger, Component, EventTouch, Input, input, instantiate, math, Node, NodePool, Prefab, Vec3, } from 'cc';
+import { _decorator, CCFloat, CCInteger, Component, EventTouch, Input, input, instantiate, math, Node, NodePool, Prefab, Vec3, } from 'cc';
 const { ccclass, property } = _decorator;
 
 //發射子彈的類型。
@@ -24,9 +24,9 @@ export class Player extends Component {
 
 
     //預設的子彈射擊型態是單發射擊
-    @property({type:ShootType, tooltip: "子彈射擊型態"})
+    @property({ type: ShootType, tooltip: "子彈射擊型態" })
     shootType: ShootType = ShootType.OneShoot;
-    @property({ type: Number, tooltip: "子彈發射頻率" })
+    @property({ type: CCFloat, tooltip: "子彈發射頻率" })
     shootRate: number = 0.5;
     shootTimer: number = 0;//計時器;
 
@@ -98,7 +98,7 @@ export class Player extends Component {
         }
     }
     public unuseBullet(bullet: Node, type: number) {
-        if(type == 0)
+        if (type == 0)
             this.bullet1Pool.put(bullet);
         else
             this.bullet2Pool.put(bullet);
