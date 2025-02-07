@@ -39,9 +39,9 @@ export class EnemyManager extends Component {
         }
     }
     protected start(): void {
-        let n = this.enemyPrefabs.length - 1;
+        let n = this.enemyPrefabs.length;
         //計時器的訂閱
-        for (let i = n; i > -1; i--) {
+        for (let i = 0; i < n; i++) {
             //注意，使用箭頭函數才可以避免this指向不同、立即執行造成undefined、閉包問題。
             this.schedule(() => this.enemySpawn(i), this.enemysSpawnRate[i]);
         }
@@ -72,7 +72,6 @@ export class EnemyManager extends Component {
     public enemyRecycle(enemy: Node, type: number) {
         this.allEnemysPool[type].put(enemy);
         this.node.removeChild(enemy);
-        console.log("回收敵人" + "type:" + type);
     }
 }
 

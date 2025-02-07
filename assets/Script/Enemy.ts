@@ -74,7 +74,6 @@ export class Enemy extends Component {
             this.isDown = true;
             this.collider2D.enabled = false;
             this.playAnimWithState('down');
-            console.log("死了");
             //this.scheduleOnce(() => this.die, 0.5);//not work
             this.scheduleOnce(() => this.die(), 0.5);//work
         }

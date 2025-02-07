@@ -1,5 +1,7 @@
 import { _decorator, Animation, CCFloat, CCInteger, Collider2D, Component, Contact2DType, EventTouch, Input, input, instantiate, IPhysics2DContact, math, Node, NodePool, Prefab, Vec3, } from 'cc';
 import { Bullet } from './Bullet';
+import { Reward, RewardType } from './Reward';
+import { GameManager } from './GameManager';
 const { ccclass, property } = _decorator;
 
 //發射子彈的類型。
@@ -24,7 +26,7 @@ export class Player extends Component {
     maxLifeCount: number = 0;
     private lifeCount: number = 0;
     @property({ type: CCFloat, tooltip: "玩家的無敵時間" })
-    invincibleTime : number = 0.75;
+    invincibleTime: number = 0.75;
     @property({ type: CCInteger, tooltip: "子彈池最大數量" })
     bulletMaxCount: number = 20;
     bullet1Pool: NodePool = new NodePool();//子彈池1
@@ -45,6 +47,9 @@ export class Player extends Component {
     shootRate: number = 0.5;
     shootTimer: number = 0;//計時器
     isDown: boolean = false;//是否擊落
+
+    @property({ type: CCInteger, tooltip: "獎勵雙擊發的持續時間" })
+    twoShootDuration: number = 5;
 
     protected onLoad(): void {
         //初始化子彈池們
@@ -70,6 +75,21 @@ export class Player extends Component {
     }
 
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
+        const reward = otherCollider.getComponent(Reward);
+        if (reward) {
+            const action = {
+                [RewardType.TwoShoot]: () => {
+                    this.shootType = ShootType.TwoShoot
+                    this.shootRate = 0.15;
+                    //計時器，等一段時間後恢復為單發射擊
+                    this.scheduleOnce(() => {this.shootType = ShootType.OneShoot;this.shootRate = 0.25}, this.twoShootDuration);
+                },
+                [RewardType.Bomb]: () => GameManager.getInstance().AddBomb(),
+            }
+            action[reward.rewardType]?.();
+            return;
+        }
+
         this.lifeCount--;
         this.collider2D.enabled = false;
         if (this.lifeCount <= 0) {
@@ -81,7 +101,7 @@ export class Player extends Component {
         else {
             this.animation.stop();
             this.playAnimWithState("hit");
-            this.scheduleOnce(() => this.collider2D.enabled = true,this.invincibleTime);
+            this.scheduleOnce(() => this.collider2D.enabled = true, this.invincibleTime);
         }
     }
 
