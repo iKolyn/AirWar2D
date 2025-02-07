@@ -1,4 +1,5 @@
 import { _decorator, Canvas, CCFloat, CCInteger, Component, director, Enum, instantiate, math, Node, NodePool, Pool, Prefab, UITransform, Vec2, view } from 'cc';
+import { Enemy } from './Enemy';
 const { ccclass, property } = _decorator;
 //飛機的型別
 //換成number的方式，利用 EnumType as Number或者Number(Enum);
@@ -21,7 +22,7 @@ export class EnemyManager extends Component {
     @property({ type: CCInteger, tooltip: "生成範圍" })
     spawnRange: number[] = [];
 
-    @property({ type: Node, tooltip: "敵人的節點池"})
+    @property({ type: Node, tooltip: "敵人的節點池" })
     private allEnemysPool: NodePool[] = [];
 
     protected onLoad(): void {
@@ -57,17 +58,21 @@ export class EnemyManager extends Component {
             : instantiate(this.enemyPrefabs[type]);
 
         const enmyHeight = enemy.getComponent(UITransform).height;
-        //丟入父節點
-        this.node.addChild(enemy);
         //生成的範圍。
         const px: number = math.randomRangeInt(-this.spawnRange[type], this.spawnRange[type]);
         const py: number = (view.getVisibleSize().height * 0.5) + enmyHeight;//乘法比除法快。
         enemy.setPosition(px, py, 0);
+        //初始化敵人
+        enemy.getComponent(Enemy).initEnemy();
+        //丟入父節點
+        this.node.addChild(enemy);
+
     }
-    enemyRecycle(enemy: Node, type: number) {
+
+    public enemyRecycle(enemy: Node, type: number) {
         this.allEnemysPool[type].put(enemy);
         this.node.removeChild(enemy);
-        console.log("回收敵人"+"type:"+type);
+        console.log("回收敵人" + "type:" + type);
     }
 }
 
