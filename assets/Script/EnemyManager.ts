@@ -7,6 +7,7 @@ enum EnemyType {
     Enemy1,
     Enemy2,
 }
+
 @ccclass('EnemyManager')
 export class EnemyManager extends Component {
     //需要飛機生成的頻率
@@ -39,7 +40,7 @@ export class EnemyManager extends Component {
     protected start(): void {
         let n = this.enemyPrefabs.length - 1;
         //計時器的訂閱
-        for (let i = n; i > 0; i--) {
+        for (let i = n; i > -1; i--) {
             //注意，使用箭頭函數才可以避免this指向不同、立即執行造成undefined、閉包問題。
             this.schedule(() => this.enemySpawn(i), this.enemysSpawnRate[i]);
         }
@@ -63,7 +64,11 @@ export class EnemyManager extends Component {
         const py: number = (view.getVisibleSize().height * 0.5) + enmyHeight;//乘法比除法快。
         enemy.setPosition(px, py, 0);
     }
-
+    enemyRecycle(enemy: Node, type: number) {
+        this.allEnemysPool[type].put(enemy);
+        this.node.removeChild(enemy);
+        console.log("回收敵人"+"type:"+type);
+    }
 }
 
 
