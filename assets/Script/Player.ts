@@ -49,6 +49,7 @@ export class Player extends Component {
     @property({ type: CCFloat, tooltip: "子彈發射頻率" })
     shootRate: number = 0.5;
     shootTimer: number = 0;//計時器
+    canControl:Boolean;
     isDown: boolean = false;//是否擊落
 
     @property({ type: CCInteger, tooltip: "獎勵雙擊發的持續時間" })
@@ -75,6 +76,7 @@ export class Player extends Component {
         }
         this.lifeCount = this.maxLifeCount;
         this.lifeCountUI.updateUI(this.lifeCount);//注意順序
+        this.canControl = true;
         this.isDown = false;
     }
 
@@ -89,7 +91,7 @@ export class Player extends Component {
                     //計時器，等一段時間後恢復為單發射擊
                     this.scheduleOnce(() => {this.shootType = ShootType.OneShoot;this.shootRate = 0.25}, this.twoShootDuration);
                 },
-                [RewardType.Bomb]: () => GameManager.getInstance().AddBomb(),
+                [RewardType.Bomb]: () => GameManager.getInstance().addBomb(),
             }
             action[reward.rewardType]?.();
             return;
@@ -121,8 +123,9 @@ export class Player extends Component {
         this.animation.play(this.playerState[animName]);
     }
 
-    onTouchMove(event: EventTouch) {
-        if (this.lifeCount < 1) return;
+    onTouchMove(event: EventTouch) {        
+        if (this.lifeCount < 1 || this.canControl == false) return;
+
         const p = this.node.position;
         //允許飛機一部分可以移出螢幕，但是不能完全移出螢幕
         const targetPosition = new Vec3(
@@ -131,7 +134,14 @@ export class Player extends Component {
             p.z);
 
         this.node.setPosition(targetPosition);
+    }
 
+    public disableControl(){
+        this.canControl = false;
+    }
+    
+    public enableControl(){
+        this.canControl = true;
     }
 
     update(deltaTime: number) {
@@ -159,6 +169,7 @@ export class Player extends Component {
         //注意要使用世界座標
         bullet.setWorldPosition(this.bulletShootPoint[0].worldPosition);
     }
+
     useBullet2() {
         // Create bullets for positions 1 and 2
         for (let i = 1; i <= 2; i++) {
@@ -177,6 +188,7 @@ export class Player extends Component {
         else
             this.bullet2Pool.put(bullet);
     }
+
     die() {
         input.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
         if (this.collider2D) {

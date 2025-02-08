@@ -1,5 +1,6 @@
-import { _decorator, Animation, CCFloat, CCInteger, Collider2D, Component, Contact2DType, director, Node, UITransform, view } from 'cc';
+import { _decorator, Animation, CCFloat, CCInteger, Collider2D, Component, Contact2DType, director, Node, UITransform, view, instantiate } from 'cc';
 import { EnemyManager } from './EnemyManager';
+import { GameManager } from './GameManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Enemy')
@@ -19,6 +20,8 @@ export class Enemy extends Component {
     @property({ type: CCInteger, tooltip: "我的血量" })
     maxHp: number = 0;
     hp: number = 0;
+    @property({ type: CCInteger, tooltip: "擊落後得到的分數" })
+    score: number = 0;
 
     //我要一個固定血量、會被扣的血量。
     @property({ type: CCFloat, tooltip: "我的高度" })
@@ -36,7 +39,9 @@ export class Enemy extends Component {
             "down": "Enemy" + this.enemyN + "_Down",
         };
         this.initEnemy();
+        this.initScore();
     }
+
     initEnemy() {
         this.isDown = false;
         this.hp = this.maxHp;
@@ -46,6 +51,15 @@ export class Enemy extends Component {
         this.collider2D.enabled = true;
         this.collider2D.on(Contact2DType.BEGIN_CONTACT, this.hit, this);
         this.playAnimWithState('idle');
+    }
+
+    initScore() {
+        const action = {
+            [0]: () => this.score = 50,
+            [1]: () => this.score = 100,
+            [2]: () => this.score = 150,
+        };
+        action[this.enemyN]?.();
     }
 
     update(deltaTime: number) {
@@ -67,7 +81,7 @@ export class Enemy extends Component {
 
     hit(selfCollider: Collider2D, otherCollider: Collider2D) {
         this.hp--;
-        
+
         if (this.hp <= 0 && this.isDown == false) {
             this.animation.stop();//先重製動畫
 
@@ -76,13 +90,14 @@ export class Enemy extends Component {
             this.playAnimWithState('down');
             //this.scheduleOnce(() => this.die, 0.5);//not work
             this.scheduleOnce(() => this.die(), 0.5);//work
+            GameManager.getInstance().addScore(this.score);//addScore
         }
 
         //因為enemy0是唯一沒有hit動畫的，所以這樣寫，輕鬆避免掉。
         if (this.enemyN != 0 && this.isDown == false) {
             this.animation.stop();
             this.playAnimWithState('hit');
-            this.scheduleOnce(() => {if(!this.isDown) this.playAnimWithState('idle');}, 0.2)
+            this.scheduleOnce(() => { if (!this.isDown) this.playAnimWithState('idle'); }, 0.2)
         }
     }
 
