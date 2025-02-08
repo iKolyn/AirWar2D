@@ -284,6 +284,10 @@
     "collider2D": {
       "__id__": 14
     },
+    "hitAudio": {
+      "__uuid__": "29e8408e-3b7e-465a-befa-2bfa71786b77",
+      "__expectedType__": "cc.AudioClip"
+    },
     "stateDirc": {},
     "animation": {
       "__id__": 7
@@ -291,6 +295,7 @@
     "enemyN": 0,
     "speed": 300,
     "maxHp": 1,
+    "score": 0,
     "_id": ""
   },
   {
@@ -391,6 +396,7 @@
       "__id__": 0
     },
     "fileId": "f3DBA0uuhA95J8W7e7Ur8V",
+    "instance": null,
     "targetOverrides": []
   }
 ]

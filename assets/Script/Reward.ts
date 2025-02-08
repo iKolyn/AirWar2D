@@ -1,5 +1,6 @@
-import { _decorator, CCFloat, CCInteger, Collider2D, Component, Contact2DType, Node, RigidBody, UI, UITransform, view } from 'cc';
+import { _decorator, AudioClip, CCFloat, CCInteger, Collider2D, Component, Contact2DType, Node, RigidBody, UI, UITransform, view } from 'cc';
 import { RewardManager } from './RewardManager';
+import { AudioMgr } from './AudioMgr';
 const { ccclass, property } = _decorator;
 
 //注意這邊的用法，跟C#的public不同，要export導出才可以被其他人使用。

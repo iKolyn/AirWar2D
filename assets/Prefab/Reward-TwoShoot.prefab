@@ -219,6 +219,16 @@
     },
     "rewardManager": null,
     "collider2D": null,
+    "rewardAudio": [
+      {
+        "__uuid__": "8623761b-8e7a-41ae-93e2-eea8bc4f642e",
+        "__expectedType__": "cc.AudioClip"
+      },
+      {
+        "__uuid__": "283d9c99-1884-4f6f-a6f6-a9b924856f8c",
+        "__expectedType__": "cc.AudioClip"
+      }
+    ],
     "rewardType": 0,
     "speed": 150,
     "swingAmount": 140,
@@ -238,6 +248,7 @@
       "__id__": 0
     },
     "fileId": "795JpAS2FHfJE8FzhlbTdI",
+    "instance": null,
     "targetOverrides": null
   }
 ]

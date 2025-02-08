@@ -1,7 +1,8 @@
-import { _decorator, CCInteger, Component, director, Node, sys } from 'cc';
+import { _decorator, AudioClip, CCInteger, Component, director, Node, sys } from 'cc';
 import { ScoreUI } from './UI/ScoreUI';
 import { Player } from './Player';
 import { GameOverUI } from './UI/GameOverUI';
+import { AudioMgr } from './AudioMgr';
 const { ccclass, property } = _decorator;
 
 //單例模式
@@ -12,6 +13,10 @@ export class GameManager extends Component {
         return this._instance ??= new GameManager();
     }
 
+    @property({type:AudioClip, tooltip: "背景音樂"})
+    private bgm: AudioClip = null!;
+    @property({ type: AudioClip, tooltip: "按鈕音效" })
+    private buttonAudio: AudioClip = null!;
     @property
     private player: Player;
     @property({ type: Node, tooltip: "暫停按鈕" })
@@ -35,11 +40,15 @@ export class GameManager extends Component {
         this.player = director.getScene().getComponentInChildren(Player);
     }
 
+    start(): void {
+        AudioMgr.inst.play(this.bgm,0.075);
+    }
+
     public addBomb() {
         this.bombNumber += 1;
         this.node.emit("onBombChange");//發送事件
     }
-    
+
     public useBomb(){
         if(this.bombNumber <= 0){
             console.error("沒有炸彈了還使用炸彈")
@@ -63,26 +72,33 @@ export class GameManager extends Component {
     }
 
     onPauseButtonClick() {
+        this.node.emit("onPauseGame");
         director.pause();
+        AudioMgr.inst.playOneShot(this.buttonAudio, 1.3);
+        AudioMgr.inst.pause();
         this.player.disableControl();
         this.pauseButtonNode.active = false;
         this.resumeButtonNode.active = true;
     }
 
     onResumeButtonClick() {
+        this.node.emit("onResumeGame");
         director.resume();
+        AudioMgr.inst.playOneShot(this.buttonAudio, 1.3);
+        AudioMgr.inst.resume();
         this.player.enableControl();
         this.resumeButtonNode.active = false;
         this.pauseButtonNode.active = true;
     }
 
     onRestartButtonClick() {
+        AudioMgr.inst.playOneShot(this.buttonAudio, 1.3);
         director.loadScene(director.getScene().name);
         this.onResumeButtonClick();
     }
 
     onQuitButtonClick() {
-
+        //沒有這個方法
     }
 
     gameOver() {

@@ -1,12 +1,17 @@
-import { _decorator, Animation, CCFloat, CCInteger, Collider2D, Component, Contact2DType, director, Node, UITransform, view, instantiate } from 'cc';
+import { _decorator, Animation, CCFloat, CCInteger, Collider2D, Component, Contact2DType, director, Node, UITransform, view, instantiate, AudioClip, AudioSource } from 'cc';
 import { EnemyManager } from './EnemyManager';
 import { GameManager } from './GameManager';
+import { AudioMgr } from './AudioMgr';
 const { ccclass, property } = _decorator;
 
 @ccclass('Enemy')
 export class Enemy extends Component {
     @property({ type: Collider2D, tooltip: "敵人的碰撞器" })
     collider2D: Collider2D = null!;
+    @property({ type: AudioSource, tooltip: "Enemy2專有" })
+    enemy2Audio: AudioSource | null = null!;
+    @property({ type: AudioClip, tooltip: "擊中音效" })
+    hitAudio: AudioClip = null!;
     //字典
     @property({ type: [String, String], tooltip: "敵人當前狀態" })
     stateDirc: { [key: string]: string } = {};
@@ -51,6 +56,8 @@ export class Enemy extends Component {
         this.collider2D.enabled = true;
         this.collider2D.on(Contact2DType.BEGIN_CONTACT, this.hit, this);
         this.playAnimWithState('idle');
+        GameManager.getInstance().node.on("onPauseGame", this.onPauseGame, this);
+        GameManager.getInstance().node.on("onResumeGame", this.onResumeGame, this);
     }
 
     initScore() {
@@ -83,8 +90,10 @@ export class Enemy extends Component {
         this.hp--;
 
         if (this.hp <= 0 && this.isDown == false) {
-            this.die();
+            this.isDown = true;
+            this.bekill();
         }
+
         //因為enemy0是唯一沒有hit動畫的，所以這樣寫，輕鬆避免掉。
         if (this.enemyN != 0 && this.isDown == false) {
             this.animation.stop();
@@ -93,16 +102,27 @@ export class Enemy extends Component {
         }
     }
 
-    die() {
+    onPauseGame() {
+        this.enemy2Audio?.pause();
+    }
+
+    onResumeGame() {
+        this.enemy2Audio?.play();
+    }
+
+    bekill() {
+        GameManager.getInstance().addScore(this.score);//addScore
+        AudioMgr.inst.playOneShot(this.hitAudio, 1.4);
         this.animation.stop();//先重製動畫
-        this.isDown = true;
         this.collider2D.enabled = false;
         this.playAnimWithState('down');
         //this.scheduleOnce(() => this.die, 0.5);//not work
-        this.scheduleOnce(() => {
-            this.enemyManager.enemyRecycle(this.node, this.enemyN);
-            this.collider2D.off(Contact2DType.BEGIN_CONTACT, this.hit, this);
-        }, 0.5);//work
-        GameManager.getInstance().addScore(this.score);//addScore
+        this.scheduleOnce(() => this.die(), 0.5);//work
+    }
+    die() {
+        this.enemyManager.enemyRecycle(this.node, this.enemyN);
+        this.collider2D.off(Contact2DType.BEGIN_CONTACT, this.hit, this);
+        GameManager.getInstance().node.off("onPauseGame", this.onPauseGame, this);
+        GameManager.getInstance().node.off("onResumeGame", this.onResumeGame, this);
     }
 }

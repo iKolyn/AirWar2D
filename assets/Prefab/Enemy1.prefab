@@ -35,10 +35,13 @@
       },
       {
         "__id__": 14
+      },
+      {
+        "__id__": 18
       }
     ],
     "_prefab": {
-      "__id__": 18
+      "__id__": 20
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -288,6 +291,10 @@
     "collider2D": {
       "__id__": 14
     },
+    "hitAudio": {
+      "__uuid__": "72182d9d-022b-4814-813a-0b1872eab111",
+      "__expectedType__": "cc.AudioClip"
+    },
     "stateDirc": {},
     "animation": {
       "__id__": 7
@@ -295,6 +302,7 @@
     "enemyN": 1,
     "speed": 200,
     "maxHp": 3,
+    "score": 0,
     "_id": ""
   },
   {
@@ -397,6 +405,31 @@
     "fileId": "75PLweSBNKTYd19NjRftzU"
   },
   {
+    "__type__": "cc.AudioSource",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "__prefab": {
+      "__id__": 19
+    },
+    "_clip": {
+      "__uuid__": "72182d9d-022b-4814-813a-0b1872eab111",
+      "__expectedType__": "cc.AudioClip"
+    },
+    "_loop": false,
+    "_playOnAwake": false,
+    "_volume": 1,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.CompPrefabInfo",
+    "fileId": "7cKGiyy9xBvp2Fc8MxQewi"
+  },
+  {
     "__type__": "cc.PrefabInfo",
     "root": {
       "__id__": 1
@@ -405,6 +438,7 @@
       "__id__": 0
     },
     "fileId": "f3DBA0uuhA95J8W7e7Ur8V",
+    "instance": null,
     "targetOverrides": []
   }
 ]

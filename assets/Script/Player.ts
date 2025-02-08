@@ -1,8 +1,9 @@
-import { _decorator, Animation, CCFloat, CCInteger, Collider2D, Component, Contact2DType, EventTouch, Game, Input, input, instantiate, IPhysics2DContact, math, Node, NodePool, Prefab, Vec3, } from 'cc';
+import { _decorator, Animation, AudioClip, CCFloat, CCInteger, Collider2D, Component, Contact2DType, EventTouch, Game, Input, input, instantiate, IPhysics2DContact, math, Node, NodePool, Prefab, Vec3, } from 'cc';
 import { Bullet } from './Bullet';
 import { Reward, RewardType } from './Reward';
 import { GameManager } from './GameManager';
 import { LifeCountUI } from './UI/LifeCountUI';
+import { AudioMgr } from './AudioMgr';
 const { ccclass, property } = _decorator;
 
 //發射子彈的類型。
@@ -30,6 +31,11 @@ export class Player extends Component {
     private lifeCount: number = 0;
     @property({ type: CCFloat, tooltip: "玩家的無敵時間" })
     invincibleTime: number = 0.75;
+    @property({ type: AudioClip, tooltip: "發射子彈的音效" })
+    shootAudio: AudioClip = null!;
+    @property({ type: AudioClip, tooltip: "玩家死亡的音效" })
+    dieAudio: AudioClip = null!;
+    speed: number = 300;
     @property({ type: CCInteger, tooltip: "子彈池最大數量" })
     bulletMaxCount: number = 20;
     bullet1Pool: NodePool = new NodePool();//子彈池1
@@ -85,11 +91,10 @@ export class Player extends Component {
         if (reward) {
             const action = {
                 [RewardType.TwoShoot]: () => {
-                    this.unschedule(() => {this.shootType = ShootType.OneShoot;this.shootRate = 0.25});
                     this.shootType = ShootType.TwoShoot
                     this.shootRate = 0.15;
                     //計時器，等一段時間後恢復為單發射擊
-                    this.scheduleOnce(() => {this.shootType = ShootType.OneShoot;this.shootRate = 0.25}, this.twoShootDuration);
+                    this.scheduleOnce(() => {this.shootType = ShootType.OneShoot;this.shootRate = 0.3}, this.twoShootDuration);
                 },
                 [RewardType.Bomb]: () => GameManager.getInstance().addBomb(),
             }
@@ -102,6 +107,7 @@ export class Player extends Component {
         if (this.lifeCount <= 0) {
             this.isDown = true;
             this.animation.stop();
+            AudioMgr.inst.playOneShot(this.dieAudio, 2);
             this.playAnimWithState("down");
             this.scheduleOnce(() => this.die(), 1);
         }
@@ -155,6 +161,7 @@ export class Player extends Component {
                 [ShootType.OneShoot]: () => this.useBullet1(),
                 [ShootType.TwoShoot]: () => this.useBullet2(),
             };
+            AudioMgr.inst.playOneShot(this.shootAudio, 0.7);
             shootAction[this.shootType]?.();
         }
     }
