@@ -1,6 +1,7 @@
 import { _decorator, CCInteger, Component, director, Node } from 'cc';
 import { ScoreUI } from './UI/ScoreUI';
 import { Player } from './Player';
+import { GameOverUI } from './UI/GameOverUI';
 const { ccclass, property } = _decorator;
 
 //單例模式
@@ -22,9 +23,14 @@ export class GameManager extends Component {
     private bombNumber: number = 0;
     @property({ type: CCInteger, tooltip: "分數" })
     private score: number = 0;
+    private highScore:number = 0;
+
     @property({ type: ScoreUI, tooltip: "分數UI節點" })
     private scoreUI: ScoreUI = null!;
 
+
+    @property({ type: GameOverUI, tooltip: "遊戲結束UI" })
+    private gameOverUI: GameOverUI = null!;
 
     onLoad() {
         GameManager._instance = this;//靜態的要透過類訪問
@@ -43,19 +49,25 @@ export class GameManager extends Component {
     public addScore(value: number) {
         this.score += value
         this.scoreUI.updateUI(this.score)
+        this.highScore = Math.max(this.highScore, this.score);
     }
 
-    public onPauseButtonClick() {
+    onPauseButtonClick() {
         director.pause();
         this.player.disableControl();
         this.pauseButtonNode.active = false;
         this.resumeButtonNode.active = true;
     }
 
-    public onResumeButtonClick() {
+    onResumeButtonClick() {
         director.resume();
         this.player.enableControl();
         this.resumeButtonNode.active = false;
         this.pauseButtonNode.active = true;
+    }
+
+    gameOver(){
+        this.onPauseButtonClick();
+        this.gameOverUI.showGameOverUI(10,8);
     }
 }

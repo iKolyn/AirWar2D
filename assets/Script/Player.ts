@@ -1,4 +1,4 @@
-import { _decorator, Animation, CCFloat, CCInteger, Collider2D, Component, Contact2DType, EventTouch, Input, input, instantiate, IPhysics2DContact, math, Node, NodePool, Prefab, Vec3, } from 'cc';
+import { _decorator, Animation, CCFloat, CCInteger, Collider2D, Component, Contact2DType, EventTouch, Game, Input, input, instantiate, IPhysics2DContact, math, Node, NodePool, Prefab, Vec3, } from 'cc';
 import { Bullet } from './Bullet';
 import { Reward, RewardType } from './Reward';
 import { GameManager } from './GameManager';
@@ -190,6 +190,7 @@ export class Player extends Component {
     }
 
     die() {
+        GameManager.getInstance().gameOver();//利用gameManager呼叫gameOver
         input.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
         if (this.collider2D) {
             this.collider2D.off(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
