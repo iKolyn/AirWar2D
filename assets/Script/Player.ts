@@ -2,6 +2,7 @@ import { _decorator, Animation, CCFloat, CCInteger, Collider2D, Component, Conta
 import { Bullet } from './Bullet';
 import { Reward, RewardType } from './Reward';
 import { GameManager } from './GameManager';
+import { LifeCountUI } from './UI/LifeCountUI';
 const { ccclass, property } = _decorator;
 
 //發射子彈的類型。
@@ -22,6 +23,8 @@ export class Player extends Component {
         "hit": "Player_Hit",
         "down": "Player_Down",
     };
+    @property({ type: LifeCountUI, tooltip: "玩家生命值UI" })
+    lifeCountUI: LifeCountUI = null!;
     @property({ type: CCInteger, tooltip: "玩家血量" })
     maxLifeCount: number = 0;
     private lifeCount: number = 0;
@@ -71,6 +74,7 @@ export class Player extends Component {
             this.collider2D.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
         }
         this.lifeCount = this.maxLifeCount;
+        this.lifeCountUI.updateUI(this.lifeCount);//注意順序
         this.isDown = false;
     }
 
@@ -79,6 +83,7 @@ export class Player extends Component {
         if (reward) {
             const action = {
                 [RewardType.TwoShoot]: () => {
+                    this.unschedule(() => {this.shootType = ShootType.OneShoot;this.shootRate = 0.25});
                     this.shootType = ShootType.TwoShoot
                     this.shootRate = 0.15;
                     //計時器，等一段時間後恢復為單發射擊
@@ -90,7 +95,7 @@ export class Player extends Component {
             return;
         }
 
-        this.lifeCount--;
+        this.changeLifeCount(-1);
         this.collider2D.enabled = false;
         if (this.lifeCount <= 0) {
             this.isDown = true;
@@ -104,6 +109,13 @@ export class Player extends Component {
             this.scheduleOnce(() => this.collider2D.enabled = true, this.invincibleTime);
         }
     }
+
+    //!!!注意這邊的寫法，調用方法來改變生命值，同時改變UI。
+    changeLifeCount(count:number){
+        this.lifeCount += count;
+        this.lifeCountUI.updateUI(this.lifeCount);
+    }
+
 
     playAnimWithState(animName: string) {
         this.animation.play(this.playerState[animName]);

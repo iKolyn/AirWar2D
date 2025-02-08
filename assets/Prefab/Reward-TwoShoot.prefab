@@ -59,7 +59,7 @@
       "z": 1
     },
     "_mobility": 0,
-    "_layer": 33554432,
+    "_layer": 1,
     "_euler": {
       "__type__": "cc.Vec3",
       "x": 0,
@@ -219,7 +219,7 @@
     },
     "rewardManager": null,
     "collider2D": null,
-    "rewordType": 0,
+    "rewardType": 0,
     "speed": 150,
     "swingAmount": 140,
     "swingSpeed": 2.5,
@@ -238,7 +238,6 @@
       "__id__": 0
     },
     "fileId": "795JpAS2FHfJE8FzhlbTdI",
-    "instance": null,
     "targetOverrides": null
   }
 ]

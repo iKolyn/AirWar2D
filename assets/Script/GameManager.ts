@@ -9,14 +9,19 @@ export class GameManager extends Component {
         return this._instance ??= new GameManager();
     }
     @property({ type: CCInteger, tooltip: "炸彈數量" })
-    bombNumber: number = 0;
+    private bombNumber: number = 0;
 
-    start() {
+    onLoad() {
         GameManager._instance = this;//靜態的要透過類訪問
     }
 
     public AddBomb() {
         this.bombNumber += 1;
+        this.node.emit("onBombChange");//發送事件
+    }
+    
+    public getBombNumber():number{
+        return this.bombNumber
     }
 
 
