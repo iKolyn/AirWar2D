@@ -19,6 +19,7 @@ export class LifeCountUI extends Component {
             this.lifeCountLabel = this.getComponentInChildren(LabelComponent)!;
         }
     }
+    
     updateUI(value:number){
         this.lifeCountLabel.string = "" + value;
     }

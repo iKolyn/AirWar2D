@@ -15,6 +15,7 @@ export class BombUI extends Component {
     onBombChange(){
         this.numberLabel.string = "" + GameManager.getInstance().getBombNumber();
     }
+    
     protected onDestroy(): void {
         //取消註冊事件
         //GameManager.getInstance().node.off("onBombChange", this.onBombChange, this);

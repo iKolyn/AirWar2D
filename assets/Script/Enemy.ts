@@ -79,31 +79,30 @@ export class Enemy extends Component {
         this.animation.play(this.stateDirc[animName]);
     }
 
-    hit(selfCollider: Collider2D, otherCollider: Collider2D) {
+    hit() {
         this.hp--;
 
         if (this.hp <= 0 && this.isDown == false) {
-            this.animation.stop();//先重製動畫
-
-            this.isDown = true;
-            this.collider2D.enabled = false;
-            this.playAnimWithState('down');
-            //this.scheduleOnce(() => this.die, 0.5);//not work
-            this.scheduleOnce(() => this.die(), 0.5);//work
-            GameManager.getInstance().addScore(this.score);//addScore
+            this.die();
         }
-
         //因為enemy0是唯一沒有hit動畫的，所以這樣寫，輕鬆避免掉。
         if (this.enemyN != 0 && this.isDown == false) {
             this.animation.stop();
             this.playAnimWithState('hit');
-            this.scheduleOnce(() => { if (!this.isDown) this.playAnimWithState('idle'); }, 0.2)
+            // this.scheduleOnce(() => { if (!this.isDown) this.playAnimWithState('idle'); }, 0.2)
         }
     }
 
     die() {
-        this.enemyManager.enemyRecycle(this.node, this.enemyN);
-        this.collider2D.off(Contact2DType.BEGIN_CONTACT, this.hit, this);
+        this.animation.stop();//先重製動畫
+        this.isDown = true;
+        this.collider2D.enabled = false;
+        this.playAnimWithState('down');
+        //this.scheduleOnce(() => this.die, 0.5);//not work
+        this.scheduleOnce(() => {
+            this.enemyManager.enemyRecycle(this.node, this.enemyN);
+            this.collider2D.off(Contact2DType.BEGIN_CONTACT, this.hit, this);
+        }, 0.5);//work
+        GameManager.getInstance().addScore(this.score);//addScore
     }
-
 }

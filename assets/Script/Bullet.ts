@@ -26,6 +26,7 @@ export class Bullet extends Component {
         const rigidBody2D = this.node.getComponent(RigidBody2D);
         rigidBody2D.linearVelocity = new Vec2(0, -this.speed);
     }
+    
     //先將移動做出來
     update(delta: number) {
         const position = this.node.worldPosition;
@@ -42,6 +43,7 @@ export class Bullet extends Component {
     }
 
     unuseBullet() {
+        this.collider2D.enabled = false;
         this.player.unuseBullet(this.node, this.bulletType)
     }
 

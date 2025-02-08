@@ -103,7 +103,7 @@ export class Player extends Component {
             this.isDown = true;
             this.animation.stop();
             this.playAnimWithState("down");
-            this.scheduleOnce(() => this.die(), 0.5);
+            this.scheduleOnce(() => this.die(), 1);
         }
         else {
             this.animation.stop();

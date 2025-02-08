@@ -1,5 +1,6 @@
-import { _decorator, Canvas, CCFloat, CCInteger, Component, director, Enum, instantiate, math, Node, NodePool, Pool, Prefab, UITransform, Vec2, view } from 'cc';
+import { _decorator, Canvas, CCFloat, CCInteger, Component, director, Enum, input, Input, instantiate, math, Node, NodePool, Pool, Prefab, UITransform, Vec2, view } from 'cc';
 import { Enemy } from './Enemy';
+import { GameManager } from './GameManager';
 const { ccclass, property } = _decorator;
 //飛機的型別
 //換成number的方式，利用 EnumType as Number或者Number(Enum);
@@ -24,6 +25,12 @@ export class EnemyManager extends Component {
 
     @property({ type: Node, tooltip: "敵人的節點池" })
     private allEnemysPool: NodePool[] = [];
+    @property({ type: [Node], tooltip: "敵人的節點數組" })
+    private existEnemys: Node[] = [];
+
+    @property({ type: CCFloat, tooltip: "雙擊的指針" })
+    private doubleClickInterval: number = 200;
+    private lastClickTime: number = 0;
 
     protected onLoad(): void {
         // const canvas = director.getScene().getComponentInChildren(Canvas);
@@ -37,6 +44,8 @@ export class EnemyManager extends Component {
                 this.allEnemysPool[i].put(instantiate(this.enemyPrefabs[i]));
             }
         }
+        this.lastClickTime = 0;
+        input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
     }
     protected start(): void {
         let n = this.enemyPrefabs.length;
@@ -46,9 +55,30 @@ export class EnemyManager extends Component {
             this.schedule(() => this.enemySpawn(i), this.enemysSpawnRate[i]);
         }
     }
+
     protected onDestroy(): void {
         //計時器的取消訂閱
         this.unscheduleAllCallbacks();
+        input.off(Input.EventType.TOUCH_START, this.onTouchStart, this);
+    }
+
+    onTouchStart() {
+        const currentTime = Date.now();
+        if (currentTime - this.lastClickTime < this.doubleClickInterval) {
+            this.onDoubleClick();
+        }
+        else this.lastClickTime = currentTime;
+    }
+
+    onDoubleClick() {
+        if (GameManager.getInstance().isHaveBomb() === false) return;
+
+        //要怎麼獲得敵人?首先在你創建敵人的時候，把這個敵人存在一個數組裡面。
+        for (let enemy of this.existEnemys) {
+            enemy.getComponent(Enemy).die();  
+        }
+        this.existEnemys = [];//清空敵人
+        GameManager.getInstance().useBomb();
     }
 
     enemySpawn(type: number) {
@@ -65,14 +95,17 @@ export class EnemyManager extends Component {
         //初始化敵人
         enemy.getComponent(Enemy).initEnemy();
         //丟入父節點
-        this.node.addChild(enemy);
-
+        enemy.setParent(this.node);
+        this.existEnemys.push(enemy);
+        console.log(this.existEnemys.length);
     }
 
     public enemyRecycle(enemy: Node, type: number) {
         this.allEnemysPool[type].put(enemy);
+        //獲得要被回收的enemy的索引在哪一個位置
+        const index = this.existEnemys.indexOf(enemy);
+        //splice說明：從特定的位置刪除元素，並且刪除多少個。
+        this.existEnemys.splice(index, 1);
         this.node.removeChild(enemy);
     }
 }
-
-

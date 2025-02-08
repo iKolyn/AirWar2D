@@ -39,9 +39,22 @@ export class GameManager extends Component {
         this.bombNumber += 1;
         this.node.emit("onBombChange");//發送事件
     }
+    
+    public useBomb(){
+        if(this.bombNumber <= 0){
+            console.error("沒有炸彈了還使用炸彈")
+            return;
+        }
+        this.bombNumber -= 1;
+        this.node.emit("onBombChange");
+    }
 
     public getBombNumber(): number {
         return this.bombNumber
+    }
+
+    public isHaveBomb():boolean{
+        return this.bombNumber > 0;
     }
 
     public addScore(value: number) {
