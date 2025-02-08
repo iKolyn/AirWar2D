@@ -1,4 +1,4 @@
-import { _decorator, CCInteger, Component, director, Node } from 'cc';
+import { _decorator, CCInteger, Component, director, Node, sys } from 'cc';
 import { ScoreUI } from './UI/ScoreUI';
 import { Player } from './Player';
 import { GameOverUI } from './UI/GameOverUI';
@@ -23,8 +23,6 @@ export class GameManager extends Component {
     private bombNumber: number = 0;
     @property({ type: CCInteger, tooltip: "分數" })
     private score: number = 0;
-    private highScore:number = 0;
-
     @property({ type: ScoreUI, tooltip: "分數UI節點" })
     private scoreUI: ScoreUI = null!;
 
@@ -49,7 +47,6 @@ export class GameManager extends Component {
     public addScore(value: number) {
         this.score += value
         this.scoreUI.updateUI(this.score)
-        this.highScore = Math.max(this.highScore, this.score);
     }
 
     onPauseButtonClick() {
@@ -66,8 +63,27 @@ export class GameManager extends Component {
         this.pauseButtonNode.active = true;
     }
 
-    gameOver(){
+    onRestartButtonClick() {
+        director.loadScene(director.getScene().name);
+        this.onResumeButtonClick();
+    }
+
+    onQuitButtonClick() {
+
+    }
+
+    gameOver() {
         this.onPauseButtonClick();
-        this.gameOverUI.showGameOverUI(10,8);
+        //獲得本地儲存的最高分
+        let hScore = localStorage.getItem("highScore");
+        let hScoreInt = 0;
+        //如果有最高分，就轉換成整數，不然就是0
+        if (hScore !== null) {
+            hScoreInt = parseInt(hScore, 10);
+        }
+        hScoreInt = Math.max(hScoreInt, this.score);
+        localStorage.setItem("highScore", "" + hScoreInt);
+
+        this.gameOverUI.showGameOverUI(hScoreInt, this.score);
     }
 }

@@ -17,7 +17,7 @@ export class BombUI extends Component {
     }
     protected onDestroy(): void {
         //取消註冊事件
-        GameManager.getInstance().node.off("onBombChange", this.onBombChange, this);
+        //GameManager.getInstance().node.off("onBombChange", this.onBombChange, this);
     }
 }
 
