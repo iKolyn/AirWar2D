@@ -29,7 +29,7 @@ export class Bullet extends Component {
     
     //先將移動做出來
     update(delta: number) {
-        const position = this.node.worldPosition;
+        const position = this.node.getPosition();
         this.node.setPosition(position.x, position.y + (this.speed * delta), position.z);
 
         //如果子彈超出螢幕，就回收

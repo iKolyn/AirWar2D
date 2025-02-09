@@ -22,9 +22,6 @@ export class BombEffect extends Component {
         }
         this.unuseBombEffect();
 
-        this.node.setScale(0.1, 0.1, 0.1);
-        this.sprite.color = this.color;
-
         this.tweenScaleAction = tween(this.node)//注意這邊的寫法，使用this.node而不是this.node.scale
             .to(this.duration, { scale: this.targetScale }, {
                 easing: 'expoOut', onUpdate: (target: Node) => {
@@ -41,6 +38,9 @@ export class BombEffect extends Component {
                 {
                     easing: "smooth", onUpdate: (target: Sprite) => {
                         this.sprite.color = target.color;
+                    },
+                    onComplete: () => {
+                        this.unuseBombEffect();
                     }
                 }).start();
     }

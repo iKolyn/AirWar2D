@@ -4,8 +4,8 @@
     "designResolution": {
       "height": 850,
       "width": 480,
-      "fitWidth": false,
-      "fitHeight": true
+      "fitWidth": true,
+      "fitHeight": false
     }
   },
   "custom_joint_texture_layouts": [],

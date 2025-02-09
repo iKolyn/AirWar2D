@@ -1,4 +1,4 @@
-import { _decorator, Animation, AudioClip, CCFloat, CCInteger, Collider2D, Component, Contact2DType, EventTouch, Game, Input, input, instantiate, IPhysics2DContact, math, Node, NodePool, Prefab, Vec3, } from 'cc';
+import { _decorator, Animation, AudioClip, CCFloat, CCInteger, Collider2D, Component, Contact2DType, EventTouch, Game, Input, input, instantiate, IPhysics2DContact, math, Node, NodePool, Prefab, ResolutionPolicy, screen, Screen, UITransform, Vec3, view, } from 'cc';
 import { Bullet } from './Bullet';
 import { Reward, RewardType } from './Reward';
 import { GameManager } from './GameManager';
@@ -55,11 +55,15 @@ export class Player extends Component {
     @property({ type: CCFloat, tooltip: "子彈發射頻率" })
     shootRate: number = 0.5;
     shootTimer: number = 0;//計時器
-    canControl:Boolean;
+    canControl: Boolean;
     isDown: boolean = false;//是否擊落
 
     @property({ type: CCInteger, tooltip: "獎勵雙擊發的持續時間" })
     twoShootDuration: number = 5;
+
+    //紀錄當前的螢幕尺寸，並計算出移動比例T
+    private invScaleFactorX: number;
+    private invScaleFactorY: number;
 
     protected onLoad(): void {
         //初始化子彈池們
@@ -72,10 +76,12 @@ export class Player extends Component {
             this.bullet2Pool.put(bullet2);
         }
         this.initPlayer();
-
     }
+
     initPlayer() {
+        window.addEventListener('resize', this.onResize.bind(this));
         input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+        this.onResize();
         this.collider2D ??= this.node.getComponent(Collider2D);
         if (this.collider2D) {
             this.collider2D.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
@@ -86,6 +92,12 @@ export class Player extends Component {
         this.isDown = false;
     }
 
+    onResize() {
+        this.invScaleFactorX = 1 / view.getScaleX() //預先計算倒數
+        this.invScaleFactorY = 1 / view.getScaleY() 
+        console.log("螢幕變化了,X跟Y是" + this.invScaleFactorX + "," + this.invScaleFactorY);
+    }
+
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
         const reward = otherCollider.getComponent(Reward);
         if (reward) {
@@ -94,7 +106,7 @@ export class Player extends Component {
                     this.shootType = ShootType.TwoShoot
                     this.shootRate = 0.15;
                     //計時器，等一段時間後恢復為單發射擊
-                    this.scheduleOnce(() => {this.shootType = ShootType.OneShoot;this.shootRate = 0.3}, this.twoShootDuration);
+                    this.scheduleOnce(() => { this.shootType = ShootType.OneShoot; this.shootRate = 0.3 }, this.twoShootDuration);
                 },
                 [RewardType.Bomb]: () => GameManager.getInstance().addBomb(),
             }
@@ -119,7 +131,7 @@ export class Player extends Component {
     }
 
     //!!!注意這邊的寫法，調用方法來改變生命值，同時改變UI。
-    changeLifeCount(count:number){
+    changeLifeCount(count: number) {
         this.lifeCount += count;
         this.lifeCountUI.updateUI(this.lifeCount);
     }
@@ -129,24 +141,28 @@ export class Player extends Component {
         this.animation.play(this.playerState[animName]);
     }
 
-    onTouchMove(event: EventTouch) {        
+    onTouchMove(event: EventTouch) {
         if (this.lifeCount < 1 || this.canControl == false) return;
 
         const p = this.node.position;
-        //允許飛機一部分可以移出螢幕，但是不能完全移出螢幕
+        const visiableSize = view.getVisibleSize();
+        const nodeSize = this.node.getComponent(UITransform).contentSize;//當前節點的邊界大小
+        //小筆記，cocos Creator使用的是中心點座標，所以最底是-0.5，最頂是0.5
+        const maxX = (visiableSize.width - nodeSize.width) * 0.55
+        const maxY = (visiableSize.height - nodeSize.height) * 0.55
         const targetPosition = new Vec3(
-            math.clamp(p.x + event.getDeltaX(), -230, 230),
-            math.clamp(p.y + event.getDeltaY(), -380, 380),
-            p.z);
-
+            math.clamp(p.x + (event.getDeltaX() * this.invScaleFactorX), -maxX, maxX),
+            math.clamp(p.y + (event.getDeltaY() * this.invScaleFactorY), -maxY, maxY),
+            p.z
+        );
         this.node.setPosition(targetPosition);
     }
 
-    public disableControl(){
+    public disableControl() {
         this.canControl = false;
     }
-    
-    public enableControl(){
+
+    public enableControl() {
         this.canControl = true;
     }
 
@@ -198,6 +214,7 @@ export class Player extends Component {
 
     die() {
         GameManager.getInstance().gameOver();//利用gameManager呼叫gameOver
+        window.removeEventListener('resize', this.onResize.bind(this));
         input.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
         if (this.collider2D) {
             this.collider2D.off(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
