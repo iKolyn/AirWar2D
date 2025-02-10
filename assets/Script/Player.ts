@@ -64,7 +64,7 @@ export class Player extends Component {
     //紀錄當前的螢幕尺寸，並計算出移動比例T
     private invScaleFactorX: number;
     private invScaleFactorY: number;
-
+    private maxPos: Vec3;
     protected onLoad(): void {
         //初始化子彈池們
         for (let i = 0; i < this.bulletMaxCount; i++) {
@@ -94,8 +94,14 @@ export class Player extends Component {
 
     onResize() {
         this.invScaleFactorX = 1 / view.getScaleX() //預先計算倒數
-        this.invScaleFactorY = 1 / view.getScaleY() 
-        console.log("螢幕變化了,X跟Y是" + this.invScaleFactorX + "," + this.invScaleFactorY);
+        this.invScaleFactorY = 1 / view.getScaleY()
+        const visiableSize = view.getVisibleSize();
+        const nodeSize = this.node.getComponent(UITransform).contentSize;//當前節點的邊界大小
+        const maxX = (visiableSize.width - nodeSize.width) * 0.55
+        const maxY = (visiableSize.height - nodeSize.height) * 0.55
+        this.maxPos = new Vec3(maxX, maxY, 0);
+
+        console.log("螢幕變化了,X跟Y是" + this.invScaleFactorX + "," + this.invScaleFactorY + "\n" + "最大座標是：" + this.maxPos);
     }
 
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
@@ -143,19 +149,13 @@ export class Player extends Component {
 
     onTouchMove(event: EventTouch) {
         if (this.lifeCount < 1 || this.canControl == false) return;
-
         const p = this.node.position;
-        const visiableSize = view.getVisibleSize();
-        const nodeSize = this.node.getComponent(UITransform).contentSize;//當前節點的邊界大小
         //小筆記，cocos Creator使用的是中心點座標，所以最底是-0.5，最頂是0.5
-        const maxX = (visiableSize.width - nodeSize.width) * 0.55
-        const maxY = (visiableSize.height - nodeSize.height) * 0.55
-        const targetPosition = new Vec3(
-            math.clamp(p.x + (event.getDeltaX() * this.invScaleFactorX), -maxX, maxX),
-            math.clamp(p.y + (event.getDeltaY() * this.invScaleFactorY), -maxY, maxY),
+        this.node.setPosition(new Vec3(
+            math.clamp(p.x + (event.getDeltaX() * this.invScaleFactorX), -this.maxPos.x, this.maxPos.x),
+            math.clamp(p.y + (event.getDeltaY() * this.invScaleFactorY), -this.maxPos.y, this.maxPos.y),
             p.z
-        );
-        this.node.setPosition(targetPosition);
+        ));
     }
 
     public disableControl() {

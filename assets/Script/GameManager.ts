@@ -1,8 +1,9 @@
-import { _decorator, AudioClip, CCInteger, Component, director, Node, sys } from 'cc';
+import { _decorator, AudioClip, CCInteger, Component, director, game, Node, sys } from 'cc';
 import { ScoreUI } from './UI/ScoreUI';
 import { Player } from './Player';
 import { GameOverUI } from './UI/GameOverUI';
 import { AudioMgr } from './AudioMgr';
+import { JSB } from 'cc/env';
 const { ccclass, property } = _decorator;
 
 //單例模式
@@ -98,7 +99,7 @@ export class GameManager extends Component {
     }
 
     onQuitButtonClick() {
-        //沒有這個方法
+        game.end();
     }
 
     gameOver() {
